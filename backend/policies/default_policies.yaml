@@ -1,0 +1,74 @@
+rules:
+  - name: block_env_file_access
+    description: Block attempts to read environment files.
+    tool: read_file
+    match:
+      arg: path
+      contains_any:
+        - ".env"
+        - "secrets"
+        - "api_key"
+        - "private_key"
+        - "id_rsa"
+    action: block
+    severity: critical
+    risk_score: 98
+    reason: "Attempted access to sensitive credential or secret file."
+
+  - name: block_dangerous_shell_commands
+    description: Block destructive or suspicious shell commands.
+    tool: run_shell_command
+    match:
+      arg: command
+      contains_any:
+        - "rm -rf"
+        - "curl | bash"
+        - "| bash"
+        - "wget | bash"
+        - "sudo"
+        - "chmod 777"
+        - "nc "
+        - "netcat"
+    action: block
+    severity: critical
+    risk_score: 95
+    reason: "Dangerous shell command detected."
+
+  - name: require_email_approval
+    description: Require human approval before sending email.
+    tool: send_email
+    match:
+      arg: to
+      exists: true
+    action: approval_required
+    severity: medium
+    risk_score: 65
+    reason: "Sending email requires human approval."
+
+  - name: block_sql_data_dumps
+    description: Block unsafe SQL queries involving user data dumps or destructive operations.
+    tool: query_database
+    match:
+      arg: query
+      contains_any:
+        - "DROP"
+        - "DELETE FROM"
+        - "SELECT * FROM users"
+        - "dump users"
+        - "password"
+        - "credentials"
+    action: block
+    severity: critical
+    risk_score: 92
+    reason: "Unsafe database query detected."
+
+  - name: allow_safe_web_search
+    description: Allow harmless web search queries.
+    tool: search_web
+    match:
+      arg: query
+      exists: true
+    action: allow
+    severity: low
+    risk_score: 10
+    reason: "Safe web search allowed."
