@@ -3,6 +3,7 @@ import type {
   ApprovalActionResponse,
   AttackPreset,
   AuditLogEntry,
+  AgentConfig,
   BulkAttackResult,
   PolicySummary,
   StatsSummary,
@@ -31,11 +32,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export function runAgent(prompt: string): Promise<AgentRunResponse> {
+export function runAgent(
+  prompt: string,
+  agentMode: string = "auto"
+): Promise<AgentRunResponse> {
   return request("/agent/run", {
     method: "POST",
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, agent_mode: agentMode }),
   });
+}
+
+export function fetchAgentConfig(): Promise<AgentConfig> {
+  return request("/agent/config");
 }
 
 export function approveAction(auditId: number): Promise<ApprovalActionResponse> {

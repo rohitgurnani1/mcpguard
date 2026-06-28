@@ -35,6 +35,14 @@ export function ResultCard({
         </div>
 
         <div className="result-item">
+          <span className="label">Agent Mode</span>
+          <code className="value mono">
+            {result.agent_mode}
+            {result.llm_model ? ` (${result.llm_model})` : ""}
+          </code>
+        </div>
+
+        <div className="result-item">
           <span className="label">Proposed Tool</span>
           <code className="value mono">{proposed_tool_call.tool_name}</code>
         </div>

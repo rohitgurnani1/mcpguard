@@ -8,6 +8,7 @@ from backend.database import get_audit_logs
 from backend.models import (
     AgentRunRequest,
     AgentRunResponse,
+    AgentConfig,
     ApprovalActionResponse,
     AttackPreset,
     AuditLogEntry,
@@ -16,6 +17,7 @@ from backend.models import (
     SimulateAttackRequest,
     StatsSummary,
 )
+from backend.agent.proposer import get_agent_config
 from backend.services.agent_service import (
     approve_action,
     deny_action,
@@ -30,12 +32,24 @@ router = APIRouter()
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok", "service": APP_NAME, "version": APP_VERSION}
+    config = get_agent_config()
+    return {
+        "status": "ok",
+        "service": APP_NAME,
+        "version": APP_VERSION,
+        "agent_mode": config["active_mode"],
+        "llm_available": config["llm_available"],
+    }
+
+
+@router.get("/agent/config", response_model=AgentConfig)
+def agent_config() -> AgentConfig:
+    return AgentConfig(**get_agent_config())
 
 
 @router.post("/agent/run", response_model=AgentRunResponse)
 def agent_run(request: AgentRunRequest) -> AgentRunResponse:
-    return run_agent(request.prompt)
+    return run_agent(request.prompt, request.agent_mode)
 
 
 @router.post("/agent/approve/{audit_id}", response_model=ApprovalActionResponse)

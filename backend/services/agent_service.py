@@ -1,7 +1,7 @@
 from typing import List
 
+from backend.agent.proposer import propose_tool_call
 from backend.attacks.presets import ATTACK_PRESETS
-from backend.agent.mock_agent import propose_tool_call
 from backend.database import get_audit_log, get_stats, log_decision, update_approval
 from backend.models import (
     AgentRunResponse,
@@ -25,8 +25,8 @@ def get_security_middleware() -> SecurityMiddleware:
     return _security
 
 
-def run_agent(prompt: str) -> AgentRunResponse:
-    tool_call = propose_tool_call(prompt)
+def run_agent(prompt: str, agent_mode: str = "auto") -> AgentRunResponse:
+    tool_call, mode_used, llm_model = propose_tool_call(prompt, agent_mode)
     security_decision = _security.evaluate(tool_call)
 
     executed = False
@@ -49,6 +49,8 @@ def run_agent(prompt: str) -> AgentRunResponse:
         proposed_tool_call=tool_call,
         security_decision=security_decision,
         approval_status=approval_status,
+        agent_mode=mode_used,
+        llm_model=llm_model,
         tool_result=tool_result,
     )
 

@@ -19,6 +19,15 @@ class ApprovalStatus(str, Enum):
 
 class AgentRunRequest(BaseModel):
     prompt: str
+    agent_mode: str = "auto"  # auto | llm | keyword
+
+
+class AgentConfig(BaseModel):
+    active_mode: str
+    llm_available: bool
+    llm_model: Optional[str] = None
+    default_mode: str
+    supported_tools: List[str]
 
 
 class ProposedToolCall(BaseModel):
@@ -39,6 +48,8 @@ class AgentRunResponse(BaseModel):
     proposed_tool_call: ProposedToolCall
     security_decision: SecurityDecision
     approval_status: ApprovalStatus = ApprovalStatus.NOT_APPLICABLE
+    agent_mode: str = "keyword"
+    llm_model: Optional[str] = None
     tool_result: Optional[Dict[str, Any]] = None
 
 

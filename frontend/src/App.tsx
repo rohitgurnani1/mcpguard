@@ -3,6 +3,7 @@ import {
   approveAction,
   checkHealth,
   denyAction,
+  fetchAgentConfig,
   fetchAttacks,
   fetchAuditLogs,
   fetchStats,
@@ -24,12 +25,15 @@ import type {
   ApprovalActionResponse,
   AttackPreset,
   AuditLogEntry,
+  AgentConfig,
   BulkAttackResult,
   StatsSummary,
 } from "./types";
 
 export default function App() {
   const [prompt, setPrompt] = useState("");
+  const [agentMode, setAgentMode] = useState("auto");
+  const [agentConfig, setAgentConfig] = useState<AgentConfig | null>(null);
   const [result, setResult] = useState<AgentRunResponse | null>(null);
   const [attacks, setAttacks] = useState<AttackPreset[]>([]);
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -60,6 +64,7 @@ export default function App() {
 
   useEffect(() => {
     checkHealth().then(setBackendOk);
+    fetchAgentConfig().then(setAgentConfig).catch(() => null);
     fetchAttacks()
       .then(setAttacks)
       .catch(() => setError("Failed to load attack presets"));
@@ -72,7 +77,7 @@ export default function App() {
     setError(null);
     setActiveAttack(null);
     try {
-      const data = await runAgent(prompt.trim());
+      const data = await runAgent(prompt.trim(), agentMode);
       setResult(data);
       await refreshLogs();
     } catch (err) {
@@ -170,7 +175,11 @@ export default function App() {
           </div>
           <div className={`status-pill ${backendOk ? "" : "offline"}`}>
             <span className={`status-dot ${backendOk ? "" : "offline"}`} />
-            {backendOk ? "Backend connected" : "Backend offline"}
+            {backendOk
+              ? agentConfig?.llm_available
+                ? `LLM · ${agentConfig.llm_model}`
+                : "Keyword agent"
+              : "Backend offline"}
           </div>
         </div>
       </header>
@@ -188,7 +197,10 @@ export default function App() {
           <PromptPanel
             prompt={prompt}
             loading={loading}
+            agentMode={agentMode}
+            agentConfig={agentConfig}
             onPromptChange={setPrompt}
+            onAgentModeChange={setAgentMode}
             onRun={handleRunAgent}
           />
           {result ? (

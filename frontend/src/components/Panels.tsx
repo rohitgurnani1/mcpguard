@@ -1,4 +1,4 @@
-import type { AttackPreset } from "../types";
+import type { AgentConfig, AttackPreset } from "../types";
 
 interface AttackSimulationProps {
   attacks: AttackPreset[];
@@ -59,26 +59,54 @@ export function AttackSimulation({
 interface PromptPanelProps {
   prompt: string;
   loading: boolean;
+  agentMode: string;
+  agentConfig: AgentConfig | null;
   onPromptChange: (value: string) => void;
+  onAgentModeChange: (value: string) => void;
   onRun: () => void;
 }
 
 export function PromptPanel({
   prompt,
   loading,
+  agentMode,
+  agentConfig,
   onPromptChange,
+  onAgentModeChange,
   onRun,
 }: PromptPanelProps) {
+  const llmReady = agentConfig?.llm_available ?? false;
+
   return (
     <section className="card">
       <div className="card-header">
         <div>
           <h2>Agent Prompt</h2>
           <p className="subtitle">
-            Enter a prompt — the mock agent proposes a tool call, then MCPGuard
-            evaluates it.
+            {llmReady
+              ? "LLM agent enabled — the model proposes tool calls, MCPGuard evaluates them."
+              : "Keyword agent active — set OPENAI_API_KEY in .env for real LLM mode."}
           </p>
         </div>
+      </div>
+
+      <div className="agent-mode-row">
+        <label className="mode-label" htmlFor="agent-mode">
+          Agent mode
+        </label>
+        <select
+          id="agent-mode"
+          className="mode-select"
+          value={agentMode}
+          onChange={(e) => onAgentModeChange(e.target.value)}
+          disabled={loading}
+        >
+          <option value="auto">Auto {llmReady ? "(LLM)" : "(Keyword)"}</option>
+          <option value="llm" disabled={!llmReady}>
+            LLM {llmReady ? `(${agentConfig?.llm_model})` : "(unavailable)"}
+          </option>
+          <option value="keyword">Keyword (offline demo)</option>
+        </select>
       </div>
 
       <textarea

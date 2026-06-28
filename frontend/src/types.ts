@@ -18,12 +18,22 @@ export interface SecurityDecision {
   policy_triggered: string | null;
 }
 
+export interface AgentConfig {
+  active_mode: string;
+  llm_available: boolean;
+  llm_model: string | null;
+  default_mode: string;
+  supported_tools: string[];
+}
+
 export interface AgentRunResponse {
   audit_id: number;
   prompt: string;
   proposed_tool_call: ProposedToolCall;
   security_decision: SecurityDecision;
   approval_status: ApprovalStatus;
+  agent_mode: string;
+  llm_model: string | null;
   tool_result: Record<string, unknown> | null;
 }
 

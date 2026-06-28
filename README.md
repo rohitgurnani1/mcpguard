@@ -17,6 +17,33 @@ Built as a resume/demo project showing security-minded AI agent design.
 - **Attack simulation** — 11 preset malicious prompts
 - **Audit dashboard** — React UI with stats, decision cards, and log table
 - **SQLite audit trail** — every decision persisted with execution status
+- **Real LLM mode** — optional OpenAI agent proposes tool calls (keyword fallback)
+
+---
+
+## LLM mode (OpenAI)
+
+By default MCPGuard uses a **keyword agent** (no API key needed). To enable a **real LLM** that proposes tool calls:
+
+```bash
+cp .env.example .env
+# Edit .env and set OPENAI_API_KEY=sk-...
+make dev
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | — | Enables LLM agent when set |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Model for tool selection |
+| `MCPGUARD_AGENT_MODE` | `auto` | `auto` · `llm` · `keyword` |
+
+- **auto** — LLM if key is set, otherwise keyword matching (CI-friendly)
+- **llm** — force LLM (falls back to keyword if API fails)
+- **keyword** — offline demo mode, no API calls
+
+The dashboard shows the active mode in the header and lets you pick **Auto / LLM / Keyword** per request.
+
+**Flow:** LLM proposes tool + args → MCPGuard policies evaluate → allow / block / approval (unchanged).
 
 ---
 
@@ -74,7 +101,10 @@ backend/
 ├── main.py              # FastAPI app entry
 ├── config.py            # Version, paths
 ├── api/routes.py        # HTTP endpoints
-├── agent/mock_agent.py  # Keyword-based demo agent
+├── agent/
+│   ├── mock_agent.py    # Keyword-based agent (offline)
+│   ├── llm_agent.py   # OpenAI tool proposer
+│   └── proposer.py    # Routes auto/llm/keyword
 ├── attacks/presets.py   # Attack simulation prompts
 ├── services/
 │   └── agent_service.py # Orchestration + approval workflow
@@ -94,7 +124,8 @@ backend/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/agent/run` | Run agent + security check |
+| `POST` | `/agent/run` | Run agent + security check (`agent_mode`: auto/llm/keyword) |
+| `GET` | `/agent/config` | LLM availability and active mode |
 | `POST` | `/agent/approve/{audit_id}` | Approve pending action |
 | `POST` | `/agent/deny/{audit_id}` | Deny pending action |
 | `GET` | `/audit/logs` | Audit log entries |
@@ -145,7 +176,7 @@ Edit `backend/policies/default_policies.yaml` and restart the server.
 - [x] Docker Compose
 - [x] One-command dev (`make dev`)
 - [x] Run-all-attacks batch demo + CI
-- [ ] Real LLM agent integration
+- [x] Real LLM agent integration (OpenAI, optional)
 - [ ] MCP server plugin for live interception
 - [ ] Policy editor UI
 
