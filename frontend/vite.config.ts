@@ -9,6 +9,7 @@ export default defineConfig({
       "/agent": "http://localhost:8000",
       "/audit": "http://localhost:8000",
       "/simulate": "http://localhost:8000",
+      "/policies": "http://localhost:8000",
       "/health": "http://localhost:8000",
     },
   },

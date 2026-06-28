@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  approveAction,
   checkHealth,
+  denyAction,
   fetchAttacks,
   fetchAuditLogs,
+  fetchStats,
   runAgent,
   simulateAttack,
 } from "./api";
@@ -13,13 +16,21 @@ import {
   PromptPanel,
 } from "./components/Panels";
 import { ResultCard } from "./components/ResultCard";
-import type { AgentRunResponse, AttackPreset, AuditLogEntry } from "./types";
+import { StatsBar } from "./components/StatsBar";
+import type {
+  AgentRunResponse,
+  ApprovalActionResponse,
+  AttackPreset,
+  AuditLogEntry,
+  StatsSummary,
+} from "./types";
 
 export default function App() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState<AgentRunResponse | null>(null);
   const [attacks, setAttacks] = useState<AttackPreset[]>([]);
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [stats, setStats] = useState<StatsSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [logsLoading, setLogsLoading] = useState(false);
   const [activeAttack, setActiveAttack] = useState<string | null>(null);
@@ -29,8 +40,12 @@ export default function App() {
   const refreshLogs = useCallback(async () => {
     setLogsLoading(true);
     try {
-      const data = await fetchAuditLogs();
-      setLogs(data);
+      const [logData, statsData] = await Promise.all([
+        fetchAuditLogs(),
+        fetchStats(),
+      ]);
+      setLogs(logData);
+      setStats(statsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load audit logs");
     } finally {
@@ -78,6 +93,29 @@ export default function App() {
     }
   }
 
+  async function handleApproval(action: "approve" | "deny") {
+    if (!result) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response: ApprovalActionResponse =
+        action === "approve"
+          ? await approveAction(result.audit_id)
+          : await denyAction(result.audit_id);
+
+      setResult({
+        ...result,
+        approval_status: response.approval_status,
+        tool_result: response.tool_result,
+      });
+      await refreshLogs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Approval action failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -117,6 +155,8 @@ export default function App() {
           </div>
         )}
 
+        <StatsBar stats={stats} />
+
         <div className="layout-top">
           <PromptPanel
             prompt={prompt}
@@ -124,7 +164,16 @@ export default function App() {
             onPromptChange={setPrompt}
             onRun={handleRunAgent}
           />
-          {result ? <ResultCard result={result} /> : <EmptyResult />}
+          {result ? (
+            <ResultCard
+              result={result}
+              loading={loading}
+              onApprove={() => handleApproval("approve")}
+              onDeny={() => handleApproval("deny")}
+            />
+          ) : (
+            <EmptyResult />
+          )}
         </div>
 
         <AttackSimulation
@@ -138,7 +187,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        MCPGuard MVP — simulated tools, YAML policies, SQLite audit trail
+        MCPGuard — YAML policies, human-in-the-loop approval, SQLite audit trail
       </footer>
     </div>
   );

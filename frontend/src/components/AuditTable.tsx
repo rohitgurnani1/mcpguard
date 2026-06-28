@@ -1,10 +1,28 @@
 import type { AuditLogEntry } from "../types";
-import { decisionClass, decisionLabel, formatTimestamp, truncate } from "../utils";
+import {
+  decisionClass,
+  decisionLabel,
+  formatTimestamp,
+  truncate,
+} from "../utils";
 
 interface AuditTableProps {
   logs: AuditLogEntry[];
   loading: boolean;
   onRefresh: () => void;
+}
+
+function approvalLabel(status: AuditLogEntry["approval_status"]): string {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "approved":
+      return "Approved";
+    case "denied":
+      return "Denied";
+    default:
+      return "—";
+  }
 }
 
 export function AuditTable({ logs, loading, onRefresh }: AuditTableProps) {
@@ -36,14 +54,15 @@ export function AuditTable({ logs, loading, onRefresh }: AuditTableProps) {
               <th>Tool</th>
               <th>Decision</th>
               <th>Risk</th>
+              <th>Approval</th>
+              <th>Executed</th>
               <th>Policy</th>
-              <th>Reason</th>
             </tr>
           </thead>
           <tbody>
             {logs.length === 0 ? (
               <tr>
-                <td colSpan={7} className="empty-row">
+                <td colSpan={8} className="empty-row">
                   No audit entries yet.
                 </td>
               </tr>
@@ -51,7 +70,7 @@ export function AuditTable({ logs, loading, onRefresh }: AuditTableProps) {
               logs.map((log) => (
                 <tr key={log.id}>
                   <td className="mono nowrap">{formatTimestamp(log.timestamp)}</td>
-                  <td title={log.prompt}>{truncate(log.prompt, 60)}</td>
+                  <td title={log.prompt}>{truncate(log.prompt, 50)}</td>
                   <td className="mono">{log.tool_name}</td>
                   <td>
                     <span className={decisionClass(log.decision)}>
@@ -59,8 +78,9 @@ export function AuditTable({ logs, loading, onRefresh }: AuditTableProps) {
                     </span>
                   </td>
                   <td className="mono">{log.risk_score}</td>
+                  <td>{approvalLabel(log.approval_status)}</td>
+                  <td>{log.executed ? "Yes" : "No"}</td>
                   <td className="mono">{log.policy_triggered ?? "—"}</td>
-                  <td title={log.reason}>{truncate(log.reason, 50)}</td>
                 </tr>
               ))
             )}

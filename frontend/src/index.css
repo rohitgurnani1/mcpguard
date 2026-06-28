@@ -259,6 +259,66 @@ body::before {
   background: var(--bg-elevated);
 }
 
+.btn-approve {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--allow);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.btn-approve:hover:not(:disabled) {
+  background: rgba(52, 211, 153, 0.25);
+}
+
+.btn-deny {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--block);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.btn-deny:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.22);
+}
+
+.approval-actions .actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-block .stat-value { color: var(--block); }
+.stat-allow .stat-value { color: var(--allow); }
+.stat-pending .stat-value { color: var(--approval); }
+
 /* Badges */
 .badge {
   display: inline-block;
