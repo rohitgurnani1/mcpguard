@@ -11,6 +11,7 @@ from backend.models import (
     ApprovalActionResponse,
     AttackPreset,
     AuditLogEntry,
+    BulkAttackResult,
     PolicySummary,
     SimulateAttackRequest,
     StatsSummary,
@@ -21,6 +22,7 @@ from backend.services.agent_service import (
     fetch_policies,
     fetch_stats,
     run_agent,
+    run_all_attacks,
 )
 
 router = APIRouter()
@@ -79,3 +81,8 @@ def list_attacks() -> List[AttackPreset]:
 @router.post("/simulate/attack", response_model=AgentRunResponse)
 def simulate_attack(request: SimulateAttackRequest) -> AgentRunResponse:
     return run_agent(request.prompt)
+
+
+@router.post("/simulate/attacks/run-all", response_model=List[BulkAttackResult])
+def simulate_all_attacks() -> List[BulkAttackResult]:
+    return run_all_attacks()

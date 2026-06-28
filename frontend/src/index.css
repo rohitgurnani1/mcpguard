@@ -319,6 +319,15 @@ body::before {
 .stat-allow .stat-value { color: var(--allow); }
 .stat-pending .stat-value { color: var(--approval); }
 
+.attack-name-cell {
+  text-transform: capitalize;
+  font-size: 0.8rem;
+}
+
+.attack-results {
+  margin-top: 0;
+}
+
 /* Badges */
 .badge {
   display: inline-block;

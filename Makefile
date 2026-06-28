@@ -12,7 +12,8 @@ frontend:
 	cd frontend && npm run dev
 
 dev:
-	@echo "Run 'make backend' and 'make frontend' in separate terminals"
+	@chmod +x scripts/dev.sh
+	@./scripts/dev.sh
 
 test:
 	PYTHONPATH=. .venv/bin/python scripts/verify_e2e.py

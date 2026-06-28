@@ -7,8 +7,10 @@ import {
   fetchAuditLogs,
   fetchStats,
   runAgent,
+  runAllAttacks,
   simulateAttack,
 } from "./api";
+import { AttackResultsTable } from "./components/AttackResultsTable";
 import { AuditTable } from "./components/AuditTable";
 import {
   AttackSimulation,
@@ -22,6 +24,7 @@ import type {
   ApprovalActionResponse,
   AttackPreset,
   AuditLogEntry,
+  BulkAttackResult,
   StatsSummary,
 } from "./types";
 
@@ -34,6 +37,8 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [logsLoading, setLogsLoading] = useState(false);
   const [activeAttack, setActiveAttack] = useState<string | null>(null);
+  const [batchResults, setBatchResults] = useState<BulkAttackResult[]>([]);
+  const [batchRunning, setBatchRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [backendOk, setBackendOk] = useState(true);
 
@@ -89,6 +94,28 @@ export default function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Attack simulation failed");
     } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRunAllAttacks() {
+    setBatchRunning(true);
+    setLoading(true);
+    setError(null);
+    setActiveAttack(null);
+    setBatchResults([]);
+    try {
+      const data = await runAllAttacks();
+      setBatchResults(data);
+      if (data.length > 0) {
+        setResult(data[data.length - 1].result);
+        setPrompt(data[data.length - 1].result.prompt);
+      }
+      await refreshLogs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Batch attack run failed");
+    } finally {
+      setBatchRunning(false);
       setLoading(false);
     }
   }
@@ -180,8 +207,12 @@ export default function App() {
           attacks={attacks}
           loading={loading}
           onRun={handleRunAttack}
+          onRunAll={handleRunAllAttacks}
           activeAttack={activeAttack}
+          batchRunning={batchRunning}
         />
+
+        <AttackResultsTable results={batchResults} />
 
         <AuditTable logs={logs} loading={logsLoading} onRefresh={refreshLogs} />
       </main>

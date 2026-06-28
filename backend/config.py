@@ -1,6 +1,6 @@
 from pathlib import Path
 
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.4.0"
 APP_NAME = "MCPGuard"
 
 ROOT_DIR = Path(__file__).resolve().parent.parent

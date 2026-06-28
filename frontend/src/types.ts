@@ -71,3 +71,9 @@ export interface ApprovalActionResponse {
   tool_result: Record<string, unknown> | null;
   message: string;
 }
+
+export interface BulkAttackResult {
+  attack_name: string;
+  description: string;
+  result: AgentRunResponse;
+}

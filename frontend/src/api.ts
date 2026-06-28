@@ -3,6 +3,7 @@ import type {
   ApprovalActionResponse,
   AttackPreset,
   AuditLogEntry,
+  BulkAttackResult,
   PolicySummary,
   StatsSummary,
 } from "./types";
@@ -53,6 +54,10 @@ export function simulateAttack(
     method: "POST",
     body: JSON.stringify({ attack_name: attackName, prompt }),
   });
+}
+
+export function runAllAttacks(): Promise<BulkAttackResult[]> {
+  return request("/simulate/attacks/run-all", { method: "POST" });
 }
 
 export function fetchAttacks(): Promise<AttackPreset[]> {

@@ -1,11 +1,13 @@
 from typing import List
 
+from backend.attacks.presets import ATTACK_PRESETS
 from backend.agent.mock_agent import propose_tool_call
 from backend.database import get_audit_log, get_stats, log_decision, update_approval
 from backend.models import (
     AgentRunResponse,
     ApprovalActionResponse,
     ApprovalStatus,
+    BulkAttackResult,
     Decision,
     PolicySummary,
     ProposedToolCall,
@@ -86,6 +88,17 @@ def _require_pending_approval(audit_id: int):
     if entry.approval_status != ApprovalStatus.PENDING:
         raise ValueError("This action has already been reviewed")
     return entry
+
+
+def run_all_attacks() -> List[BulkAttackResult]:
+    return [
+        BulkAttackResult(
+            attack_name=preset.attack_name,
+            description=preset.description,
+            result=run_agent(preset.prompt),
+        )
+        for preset in ATTACK_PRESETS
+    ]
 
 
 def fetch_stats() -> StatsSummary:

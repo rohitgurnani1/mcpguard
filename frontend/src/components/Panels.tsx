@@ -4,14 +4,18 @@ interface AttackSimulationProps {
   attacks: AttackPreset[];
   loading: boolean;
   onRun: (attack: AttackPreset) => void;
+  onRunAll: () => void;
   activeAttack: string | null;
+  batchRunning: boolean;
 }
 
 export function AttackSimulation({
   attacks,
   loading,
   onRun,
+  onRunAll,
   activeAttack,
+  batchRunning,
 }: AttackSimulationProps) {
   return (
     <section className="card">
@@ -22,6 +26,14 @@ export function AttackSimulation({
             Preset malicious prompts to test MCPGuard policy enforcement.
           </p>
         </div>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          disabled={loading || batchRunning}
+          onClick={onRunAll}
+        >
+          {batchRunning ? "Running all…" : "Run All Attacks"}
+        </button>
       </div>
 
       <div className="attack-grid">

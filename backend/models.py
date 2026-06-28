@@ -90,3 +90,9 @@ class ApprovalActionResponse(BaseModel):
     approval_status: ApprovalStatus
     tool_result: Optional[Dict[str, Any]] = None
     message: str
+
+
+class BulkAttackResult(BaseModel):
+    attack_name: str
+    description: str
+    result: AgentRunResponse

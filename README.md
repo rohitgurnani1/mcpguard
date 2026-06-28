@@ -1,5 +1,7 @@
 # MCPGuard
 
+![CI](https://github.com/rohitgurnani1/mcpguard/actions/workflows/ci.yml/badge.svg)
+
 **MCPGuard** is an AI agent tool-call security firewall. Before an agent executes sensitive actions — reading files, running shell commands, sending emails, or querying databases — MCPGuard intercepts the request, evaluates it against YAML policy rules, assigns a risk score (0–100), and returns `allow`, `block`, or `approval_required`. Every decision is logged to an audit trail.
 
 Built as a resume/demo project showing security-minded AI agent design.
@@ -20,7 +22,18 @@ Built as a resume/demo project showing security-minded AI agent design.
 
 ## Quick start
 
-### Option A: Local (recommended for dev)
+### One command (easiest)
+
+```bash
+git clone https://github.com/rohitgurnani1/mcpguard.git
+cd mcpguard
+make install
+make dev
+```
+
+Open http://localhost:5173 — dashboard, API docs at http://localhost:8000/docs
+
+### Manual (two terminals)
 
 **Backend**
 ```bash
@@ -89,6 +102,7 @@ backend/
 | `GET` | `/policies` | Loaded policy rules |
 | `GET` | `/simulate/attacks` | Attack presets |
 | `POST` | `/simulate/attack` | Run attack simulation |
+| `POST` | `/simulate/attacks/run-all` | Run all attack presets at once |
 | `GET` | `/health` | Health check |
 
 ---
@@ -129,6 +143,8 @@ Edit `backend/policies/default_policies.yaml` and restart the server.
 - [x] Audit logging + dashboard
 - [x] Human approval workflow
 - [x] Docker Compose
+- [x] One-command dev (`make dev`)
+- [x] Run-all-attacks batch demo + CI
 - [ ] Real LLM agent integration
 - [ ] MCP server plugin for live interception
 - [ ] Policy editor UI
